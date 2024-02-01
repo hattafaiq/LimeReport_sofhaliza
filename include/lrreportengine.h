@@ -158,6 +158,8 @@ public:
     float stimming_IC;
     float stimming_IO;
     float stimming_Silinder;
+    QVector<float> peak_add;
+    int odd_evenss;
     ~ReportEngine();
     bool    printReport(QPrinter *printer=0);
     bool    printReport(QMap<QString, QPrinter*> printers, bool printToAllPrinters = false);

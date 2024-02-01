@@ -1508,6 +1508,10 @@ void ReportEngine::designReport()
     d->timming_IC = stimming_IC;
     d->timming_IO = stimming_IO;
     d->timming_Silinder = stimming_Silinder;
+
+//    for(int i=0; i<add_peakss.size(); i++){
+
+//    }
     qDebug()<<"<LR masuk 4z>-------------------------------------->"<<d->timming_EC<<d->timming_EO<<d->timming_IC<<d->timming_IO<<d->timming_Silinder;
     if (m_settings)
         d->setSettings(m_settings);

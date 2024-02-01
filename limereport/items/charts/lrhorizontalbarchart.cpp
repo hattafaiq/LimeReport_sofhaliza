@@ -2,7 +2,7 @@
 
 namespace LimeReport{
 
-void HorizontalBarChart::paintChart(QPainter *painter, QRectF chartRect, QVector<float> timming)
+void HorizontalBarChart::paintChart(QPainter *painter, QRectF chartRect, QVector<float> timming, QVector<float> PeakAbs, int odd_evn)
 {
     updateMinAndMaxValues();
 

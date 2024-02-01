@@ -262,6 +262,8 @@ public:
     float timming_IC;
     float timming_IO;
     float timming_Silinder;
+    QVector<float> add_peakss;
+    int odd_evenssss;
 
 signals:
     void    pagesLoadFinished();

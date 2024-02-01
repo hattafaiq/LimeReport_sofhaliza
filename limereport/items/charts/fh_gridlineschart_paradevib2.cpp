@@ -1,9 +1,9 @@
-#include "fh_gridlineschart_paradevib.h"
+#include "fh_gridlineschart_paradevib2.h"
 //#include "kumpulan_struct.h"
 //extern struct t_chart_parade_vib_recip vib_recip;
 
 namespace LimeReport {
-void fh_gridlineschart_vibrecip::paintChart(QPainter *painter, QRectF chartRect, QVector<float> timming, QVector<float> PeakAbs, int odd_evn)
+void fh_gridlineschart_vibrecip2::paintChart(QPainter *painter, QRectF chartRect, QVector<float> timming, QVector<float> PeakAbs, int odd_evn)
 {
     updateMinAndMaxValues();
 
@@ -35,22 +35,20 @@ void fh_gridlineschart_vibrecip::paintChart(QPainter *painter, QRectF chartRect,
     gridRect.adjust(valuesHMargin * 0.2, 0, 0, 0);
 
     //paintGrid_paradeVib(painter, gridRect,100,180,260,360,750);
-   // qDebug()<<"<LR-> cek peak!!! counter:"<<counter_paintGrid_paradeVib;
+//    qDebug()<<"<LR-> cek peak!!! counter:"<<counter_paintGrid_paradeVib;
 //    for(int i=0; i<PeakAbs.size(); i++){
-//    //    qDebug()<<"->"<<PeakAbs[i];
+//        qDebug()<<"->"<<PeakAbs[i];
 //    }
-    paintGrid_paradeVib(painter, gridRect,timming[0],timming[2],timming[1],timming[3],timming[4],PeakAbs,odd_evn);
+    paintGrid_paradeVib2(painter, gridRect,timming[0],timming[2],timming[1],timming[3],timming[4],PeakAbs,odd_evn);
     paintSerialLines(
         painter,
         gridRect.adjusted(hPadding + valuesHMargin, 0, 0, 0)
         );
-    PeakAbs.clear();
     counter_paintGrid_paradeVib+=1;
 }
 
-void fh_gridlineschart_vibrecip::paintSerialLines(QPainter* painter, QRectF barsRect)
+void fh_gridlineschart_vibrecip2::paintSerialLines(QPainter* painter, QRectF barsRect)
 {
-
     if (valuesCount() == 0) return;
 
     painter->save();
@@ -80,25 +78,25 @@ void fh_gridlineschart_vibrecip::paintSerialLines(QPainter* painter, QRectF bars
     for (SeriesItem* series : m_chartItem->series()) {
         counters+=1;
 
-//        QPen pen(series->color());
-//        pen.setWidth(m_chartItem->seriesLineWidth());
-//        painter->setPen(pen);
+        QPen pen(series->color());
+        pen.setWidth(m_chartItem->seriesLineWidth());
+        painter->setPen(pen);
 
-//        const QList<qreal> &xAxisValues = series->data()->xAxisValues();
+        const QList<qreal> &xAxisValues = series->data()->xAxisValues();
         const QList<qreal> &values = series->data()->values();
-//        const int xAxisValuesSize = xAxisValues.size();
-//        qreal lastXPos = 0;
-//        qreal lastYPos = 0;
-//        if (!values.isEmpty()) {
-//            // Calculate first point position on plot before loop
-//            lastYPos = calculatePos(yAxisData, values.first(), barsRect.height());
-//        }
-//        if (xAxisValues.isEmpty()) {
-//            leftMargin = barsRect.left();
-//        } else {
-//            leftMargin = barsRect.left();
-//            lastXPos = calculatePos(xAxisData, xAxisValues.first(), barsRect.width());
-//        }
+        const int xAxisValuesSize = xAxisValues.size();
+        qreal lastXPos = 0;
+        qreal lastYPos = 0;
+        if (!values.isEmpty()) {
+            // Calculate first point position on plot before loop
+            lastYPos = calculatePos(yAxisData, values.first(), barsRect.height());
+        }
+        if (xAxisValues.isEmpty()) {
+            leftMargin = barsRect.left();
+        } else {
+            leftMargin = barsRect.left();
+            lastXPos = calculatePos(xAxisData, xAxisValues.first(), barsRect.width());
+        }
 
         float peak_max=0;
         float peak_min=0;
@@ -114,23 +112,23 @@ void fh_gridlineschart_vibrecip::paintSerialLines(QPainter* painter, QRectF bars
             }
             last_data=values.at(i);
 
-//            const qreal startY = lastYPos;
-//            const qreal endY = calculatePos(yAxisData, values.at(i+1), barsRect.height());
-//            // Record last used Y position to only calculate new one
-//            lastYPos = endY;
+            const qreal startY = lastYPos;
+            const qreal endY = calculatePos(yAxisData, values.at(i+1), barsRect.height());
+            // Record last used Y position to only calculate new one
+            lastYPos = endY;
 
-//            qreal startX = lastXPos;
-//            qreal endX = 0;
-//            if (i + 1 < xAxisValuesSize) {
-//                endX = calculatePos(xAxisData, xAxisValues.at(i+1), barsRect.width());
-//            } else {
-//                endX = startX + hStep;
-//            }
-//            // Record last used X position to only calculate new one
-//            lastXPos = endX;
+            qreal startX = lastXPos;
+            qreal endX = 0;
+            if (i + 1 < xAxisValuesSize) {
+                endX = calculatePos(xAxisData, xAxisValues.at(i+1), barsRect.width());
+            } else {
+                endX = startX + hStep;
+            }
+            // Record last used X position to only calculate new one
+            lastXPos = endX;
 
-//            QPoint startPoint = QPoint(startX + leftMargin, startY + topMargin);
-//            QPoint endPoint = QPoint(endX + leftMargin, endY + topMargin);
+            QPoint startPoint = QPoint(startX + leftMargin, startY + topMargin);
+            QPoint endPoint = QPoint(endX + leftMargin, endY + topMargin);
             //drawSegment(painter, startPoint, endPoint, series->color());
 
         }
@@ -207,22 +205,12 @@ void fh_gridlineschart_vibrecip::paintSerialLines(QPainter* painter, QRectF bars
 
                 QPoint startPoint = QPoint(startX + leftMargin, startY + topMargin /*+ (mean_rata + (counters * bagi_rata)) */ );
                 QPoint endPoint = QPoint(endX + leftMargin, endY + topMargin /*+ (mean_rata + (counters * bagi_rata))*/ );
+                //drawSegment(painter, startPoint, endPoint, series->color());
                 if (((startPoint.y() <= barsRect.bottom()) && (startPoint.y() >= barsRect.top()))&&
                     ((endPoint.y() <= barsRect.bottom()) && (endPoint.y() >= barsRect.top()))){
                      drawSegment(painter, startPoint, endPoint, series->color());
                 }
-                else{
-
-                }
-
-
-//                if((counter==1) && (i<10)) qDebug()<<"info c1:"<<startPoint.y()<<endPoint.y()<<barsRect.top()<<topMargin <<yAxisData.rangeMax();
-
-//                if((counter==9) && (i<10))qDebug()<<"info c9:"<<startPoint.y()<<endPoint.y()<<barsRect.bottom()<<yAxisData.rangeMin();
-
-                  //  (endPoint.y() <= barsRect.top() && endPoint.y() >= barsRect.bottom()))
-
-
+         //   }
         }
         //tot_high+= fabs(peak_max-peak_min);
 //        qDebug()<<"max:"<<peak_max<<"| min:"<<peak_min;
@@ -240,79 +228,5 @@ void fh_gridlineschart_vibrecip::paintSerialLines(QPainter* painter, QRectF bars
 
 
     painter->restore();
-
-#if 0
-
-    if (valuesCount() == 0) return;
-
-        painter->save();
-        painter->setRenderHint(QPainter::Antialiasing,true);
-
-        const AxisData &yAxisData = this->yAxisData();
-        const qreal delta = yAxisData.delta();
-
-        if (m_chartItem->itemMode() == DesignMode){
-            const qreal hStep = barsRect.width() / valuesCount();
-            const qreal vStep = barsRect.height() / delta;
-            const qreal topShift = (delta - (maxValue() - minValue())) * vStep + barsRect.top();
-            drawDesignMode(painter, hStep, vStep, topShift, barsRect);
-            painter->restore();
-            return;
-        }
-
-        const AxisData &xAxisData = this->xAxisData();
-        const qreal hStep = barsRect.width() / (xAxisData.rangeMax() - xAxisData.rangeMin());
-
-        qreal leftMargin = 0;
-        const qreal topMargin = barsRect.top();
-
-        int count=0;
-        for (SeriesItem* series : m_chartItem->series()) {
-            count+=1;
-            QPen pen(series->color());
-            pen.setWidth(m_chartItem->seriesLineWidth());
-            painter->setPen(pen);
-
-            const QList<qreal> &xAxisValues = series->data()->xAxisValues();
-            const QList<qreal> &values = series->data()->values();
-            const int xAxisValuesSize = xAxisValues.size();
-            qreal lastXPos = 0;
-            qreal lastYPos = 0;
-            if (!values.isEmpty()) {
-                // Calculate first point position on plot before loop
-                lastYPos = calculatePos(yAxisData, values.first(), barsRect.height());
-            }
-            if (xAxisValues.isEmpty()) {
-                leftMargin = barsRect.left();
-            } else {
-                leftMargin = barsRect.left();
-                lastXPos = calculatePos(xAxisData, xAxisValues.first(), barsRect.width());
-            }
-            if(count==1){
-                for (int i = 0; i < values.count() - 1; ++i ) {
-                    const qreal startY = lastYPos;
-                    const qreal endY = calculatePos(yAxisData, values.at(i+1), barsRect.height());
-                    // Record last used Y position to only calculate new one
-                    lastYPos = endY;
-
-                    qreal startX = lastXPos;
-                    qreal endX = 0;
-                    if (i + 1 < xAxisValuesSize) {
-                        endX = calculatePos(xAxisData, xAxisValues.at(i+1), barsRect.width());
-                    } else {
-                        endX = startX + hStep;
-                    }
-                    // Record last used X position to only calculate new one
-                    lastXPos = endX;
-
-                    QPoint startPoint = QPoint(startX + leftMargin, startY + topMargin);
-                    QPoint endPoint = QPoint(endX + leftMargin, endY + topMargin);
-                    drawSegment(painter, startPoint, endPoint, series->color());
-                }
-            }
-        }
-
-        painter->restore();
-#endif
-}    
+}
 }

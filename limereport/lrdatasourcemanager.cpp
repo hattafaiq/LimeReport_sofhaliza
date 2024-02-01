@@ -349,6 +349,17 @@ void DataSourceManager::add_timing(float t_EC, float t_EO, float t_IC, float t_I
             <<timming_Silinder;
 }
 
+void DataSourceManager::add_peak(QVector<float> peak, int odd_even){
+
+    for(int i=0; i<peak.size(); i++){
+        qDebug()<<"<LR peak: "<<peak[i];
+        list_peak.push_back(peak[i]);
+    }
+     odd_evens = odd_even;
+}
+
+
+
 void DataSourceManager::removeModel(const QString &name)
 {
     if (m_datasources.contains(name.toLower()))

@@ -30,7 +30,7 @@ void PieChart::drawPercent(QPainter *painter, QRectF chartRect, qreal startAngle
 
 }
 
-void PieChart::paintChart(QPainter *painter, QRectF chartRect, QVector<float> timming)
+void PieChart::paintChart(QPainter *painter, QRectF chartRect, QVector<float> timming, QVector<float> PeakAbs, int odd_evn)
 {
     painter->save();
     QPen pen(Qt::white);

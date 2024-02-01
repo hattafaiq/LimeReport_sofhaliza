@@ -1,7 +1,7 @@
 #include "lrgridlineschart.h"
 
 namespace LimeReport {
-void GridLinesChart::paintChart(QPainter *painter, QRectF chartRect, QVector<float> timming)
+void GridLinesChart::paintChart(QPainter *painter, QRectF chartRect, QVector<float> timming, QVector<float> PeakAbs, int odd_evn)
 {
     updateMinAndMaxValues();
 

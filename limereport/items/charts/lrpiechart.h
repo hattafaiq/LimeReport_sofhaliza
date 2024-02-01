@@ -9,7 +9,7 @@ class PieChart : public AbstractChart{
 public:
     PieChart(ChartItem* chartItem):AbstractChart(chartItem){}
     QSizeF calcChartLegendSize(const QFont &font, qreal maxWidth = 0);
-    void paintChart(QPainter *painter, QRectF chartRect, QVector<float> timming);
+    void paintChart(QPainter *painter, QRectF chartRect, QVector<float> timming, QVector<float> PeakAbs, int odd_evn);
     void paintChartLegend(QPainter *painter, QRectF legendRect, QVector<float> timming);
 protected:
     void drawPercent(QPainter *painter, QRectF chartRect, qreal startAngle, qreal angle);

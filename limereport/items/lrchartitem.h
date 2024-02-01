@@ -74,7 +74,7 @@ class AbstractChart {
 public:
     AbstractChart(ChartItem* chartItem);
     virtual ~AbstractChart(){}
-    virtual void paintChart(QPainter *painter, QRectF rect, QVector<float> timming) = 0;
+    virtual void paintChart(QPainter *painter, QRectF rect, QVector<float> timming, QVector<float> PeakAbs, int odd_evn) = 0;
     virtual void paintChartLegend(QPainter *painter, QRectF legendRect, QVector<float> timming) =0;
     virtual QSizeF calcChartLegendSize(const QFont &font, qreal maxWidth = 0) = 0;
     virtual QRectF calcChartLegendRect(const QFont& font, const QRectF& parentRect, bool takeAllRect, qreal borderMargin, qreal titleOffset);
@@ -102,6 +102,7 @@ protected:
     qreal maxValue();
     qreal minValue();
     void updateMinAndMaxValues();
+    int counter;
     int valuesCount();
     int seriesCount();
     bool verticalLabels(QPainter* painter, QRectF labelsRect);
@@ -116,7 +117,14 @@ protected:
     virtual void paintGrid_paradeVib(QPainter *painter, QRectF gridRect,
                                      const float derajat_EC,const float derajat_IC,
                                      const float derajat_EO,const float derajat_IO,
-                                     const float derajat_silinder);
+                                     const float derajat_silinder,
+                                     QVector<float> list_peak, int odd_event);
+    virtual void paintGrid_paradeVib2(QPainter *painter, QRectF gridRect,
+                                     const float derajat_EC,const float derajat_IC,
+                                     const float derajat_EO,const float derajat_IO,
+                                     const float derajat_silinder,
+                                     QVector<float> list_peak, int odd_event);
+
     virtual void paintVerticalGrid(QPainter *painter, QRectF gridRect);
     virtual void drawSegment(QPainter *painter, QPoint startPoint, QPoint endPoint, QColor color);
     virtual qreal valuesHMargin(QPainter *painter);
@@ -134,6 +142,7 @@ private:
 
 class AbstractBarChart: public AbstractSeriesChart{
 public:
+
     AbstractBarChart(ChartItem* chartItem):AbstractSeriesChart(chartItem){}
     void paintChartLegend(QPainter *painter, QRectF legendRect, QVector<float> timming);
 protected:
@@ -180,7 +189,7 @@ public:
                        LegendAlignBottomLeft,LegendAlignBottomCenter,LegendAlignBottomRight};
     enum LegendStyle{LegendPoints, LegendLines};
     enum TitleAlign{TitleAlignLeft, TitleAlignCenter, TitleAlignRight};
-    enum ChartType{Pie, VerticalBar, HorizontalBar, Lines, GridLines, GridLines_paradeVib};
+    enum ChartType{Pie, VerticalBar, HorizontalBar, Lines, GridLines, GridLines_paradeVib, GridLines_paradeVib2};
     enum LineType {
         NoLine = 0,
         HorizontalLine = 1,
@@ -192,6 +201,8 @@ public:
     float timming_IC;
     float timming_IO;
     float timming_sil;
+    QVector<float> peak_data;
+    int even_odd;
 
 //    float derajat_EC, float derajat_IC,
 //    float derajat_EO,float derajat_IO,

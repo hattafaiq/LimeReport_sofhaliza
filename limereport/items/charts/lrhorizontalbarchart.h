@@ -8,7 +8,7 @@ namespace LimeReport{
 class HorizontalBarChart: public AbstractBarChart{
 public:
     HorizontalBarChart(ChartItem* chartItem):AbstractBarChart(chartItem){}
-    void paintChart(QPainter *painter, QRectF chartRect, QVector<float> timming);
+    void paintChart(QPainter *painter, QRectF chartRect, QVector<float> timming, QVector<float> PeakAbs, int odd_evn);
     void paintHorizontalBars(QPainter *painter, QRectF barsRect);
 };
 

@@ -7,7 +7,7 @@ namespace LimeReport {
 class LinesChart: public AbstractBarChart{
 public:
     LinesChart(ChartItem* chartItem):AbstractBarChart(chartItem){}
-    void paintChart(QPainter *painter, QRectF chartRect, QVector<float> timming);
+    void paintChart(QPainter *painter, QRectF chartRect, QVector<float> timming, QVector<float> PeakAbs, int odd_evn);
 protected:
     void drawDesignMode(QPainter *painter, qreal hStep, qreal vStep, qreal topShift, QRectF barsRect);
     qreal calculatePos(const AxisData &data, qreal value, qreal rectSize) const;
