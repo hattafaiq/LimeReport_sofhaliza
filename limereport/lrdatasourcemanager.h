@@ -117,7 +117,7 @@ public:
     void addCSV(const QString& name, const QString& csvText, const QString& separator, bool firstRowIsHeader);
     bool addModel(const QString& name, QAbstractItemModel *model, bool owned);
     void add_timing(float t_EC, float t_EO, float t_IC, float t_IO, float t_sil);
-    void add_peak(QVector<float> peak, int odd_even);
+    void add_peak(QVector<float> peak, int odd_even,QString peak_judul,QString suhu_judul, QVector<float> suhu, QStringList silinder);
     float timming_EC;
     float timming_EO;
     float timming_IC;
@@ -125,6 +125,11 @@ public:
     float timming_Silinder;
     QVector<float> list_peak;
     int odd_evens;
+    QString peak_satuans;
+    QString suhu_satuans;
+    QVector<float> list_suhu;
+    QStringList list_silinder;
+
     void removeModel(const QString& name);
     ICallbackDatasource* createCallbackDatasource(const QString &name);
     void registerDbCredentialsProvider(IDbCredentialsProvider *provider);

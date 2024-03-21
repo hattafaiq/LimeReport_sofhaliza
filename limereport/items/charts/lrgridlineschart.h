@@ -7,7 +7,8 @@ namespace LimeReport {
 class GridLinesChart : public LinesChart{
 public:
     GridLinesChart(ChartItem* chartItem):LinesChart(chartItem){}
-    void paintChart(QPainter *painter, QRectF chartRect, QVector<float> timming, QVector<float> PeakAbs, int odd_evn);
+    void paintChart(QPainter *painter, QRectF chartRect, QVector<float> timming, QVector<float> PeakAbs, int odd_evn
+                    , QString satuan_peak,QString satuan_suhu, QVector<float> suhu_sil,QStringList nama_silinder);
 
 private:
     void paintSerialLines(QPainter *painter, QRectF barsRect);

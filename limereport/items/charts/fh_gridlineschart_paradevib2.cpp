@@ -3,7 +3,8 @@
 //extern struct t_chart_parade_vib_recip vib_recip;
 
 namespace LimeReport {
-void fh_gridlineschart_vibrecip2::paintChart(QPainter *painter, QRectF chartRect, QVector<float> timming, QVector<float> PeakAbs, int odd_evn)
+void fh_gridlineschart_vibrecip2::paintChart(QPainter *painter, QRectF chartRect, QVector<float> timming, QVector<float> PeakAbs, int odd_evn
+                                             , QString satuan_peak,QString satuan_suhu, QVector<float> suhu_sil,QStringList nama_silinder)
 {
     updateMinAndMaxValues();
 
@@ -39,7 +40,9 @@ void fh_gridlineschart_vibrecip2::paintChart(QPainter *painter, QRectF chartRect
 //    for(int i=0; i<PeakAbs.size(); i++){
 //        qDebug()<<"->"<<PeakAbs[i];
 //    }
-    paintGrid_paradeVib2(painter, gridRect,timming[0],timming[2],timming[1],timming[3],timming[4],PeakAbs,odd_evn);
+    qDebug()<<"pv2 cek nilai:"<<PeakAbs<<odd_evn<<satuan_peak<<satuan_suhu<<suhu_sil;
+    paintGrid_paradeVib2(painter, gridRect,timming[0],timming[2],timming[1],timming[3],timming[4],PeakAbs,odd_evn
+            ,satuan_peak, satuan_suhu, suhu_sil,nama_silinder);
     paintSerialLines(
         painter,
         gridRect.adjusted(hPadding + valuesHMargin, 0, 0, 0)
@@ -145,7 +148,7 @@ void fh_gridlineschart_vibrecip2::paintSerialLines(QPainter* painter, QRectF bar
 
     }
     //--------------------------plot tambahan------------------------------//
-    float bagi_rata = tot_high/counters;     /*mencari tinggi rata-rata kurva persilinder*/
+    float bagi_rata = tot_high/(counters/2);     /*mencari tinggi rata-rata kurva persilinder*/
     float mean_rata = bagi_rata/2;
 
     int counter=0;
@@ -208,14 +211,14 @@ void fh_gridlineschart_vibrecip2::paintSerialLines(QPainter* painter, QRectF bar
                 //drawSegment(painter, startPoint, endPoint, series->color());
                 if (((startPoint.y() <= barsRect.bottom()) && (startPoint.y() >= barsRect.top()))&&
                     ((endPoint.y() <= barsRect.bottom()) && (endPoint.y() >= barsRect.top()))){
-                     drawSegment(painter, startPoint, endPoint, series->color());
+                     /*if(counter<2)*/drawSegment(painter, startPoint, endPoint, series->color());
                 }
          //   }
         }
         //tot_high+= fabs(peak_max-peak_min);
 //        qDebug()<<"max:"<<peak_max<<"| min:"<<peak_min;
 //        qDebug()<<"berapa count chart:"<<counter << "| tinggi:"<<barsRect.height() << "last pos Y:"<< lastYPos;
-        sparators+=bagi_rata;
+        if((counter%2)==0)sparators+=bagi_rata;
     }
 
 //    for (SeriesItem* series : m_chartItem->series()){

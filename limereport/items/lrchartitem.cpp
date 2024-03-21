@@ -225,27 +225,21 @@ void ChartItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
     }
      QVector<float> timming;
      QVector<float> timming2;
-     //QVector<float> timming;
-//    timming.push_back( 100);
-//    timming.push_back( 180);
-//    timming.push_back( 260);
-//    timming.push_back( 360);
-//    timming.push_back( 720);
-//    disini kasih fungsi slotnya;
-
-     qDebug()<<"<LR masuk 10>-------------------------------------->"<<timming_EC
-                                                                     <<timming_EO
-                                                                     <<timming_IC
-                                                                     <<timming_IO;
-    timming.push_back( timming_EC);
+//     qDebug()<<"<LR masuk 10>-------------------------------------->"<<timming_EC
+//                                                                     <<timming_EO
+//                                                                     <<timming_IC
+//                                                                     <<timming_IO;
+     timming.push_back( timming_EC);
      timming.push_back( timming_EO);
      timming.push_back( timming_IC);
      timming.push_back( timming_IO);
      timming.push_back( timming_sil);
+
     paintChartTitle(painter, titleRect);
     if (m_showLegend)
         m_chart->paintChartLegend(painter,legendRect,timming);
-    m_chart->paintChart(painter,diagramRect,timming,peak_data,even_odd);
+   // qDebug()<<"1 cek nilai:"<<peak_data<<even_odd<<peak_satuan<<suhu_satuan<<suhu_val;
+    m_chart->paintChart(painter,diagramRect,timming,peak_data,even_odd,peak_satuan,suhu_satuan,suhu_val,nama_silinder);
 
     painter->restore();
     ItemDesignIntf::paint(painter,option,widget);
@@ -348,6 +342,10 @@ void ChartItem::updateItemSize(DataSourceManager *dataManager, RenderPass , int 
     timming_sil = dataManager->timming_Silinder;
     peak_data = dataManager->list_peak;
     even_odd = dataManager->odd_evens;
+    peak_satuan = dataManager->peak_satuans;
+    suhu_satuan  = dataManager->suhu_satuans;
+    suhu_val = dataManager->list_suhu;
+    nama_silinder = dataManager->list_silinder;
 }
 
 void ChartItem::fillLabels(IDataSource *dataSource)
@@ -1137,7 +1135,9 @@ void AbstractSeriesChart::paintGrid(QPainter *painter, QRectF gridRect)
 void AbstractSeriesChart::paintGrid_paradeVib(QPainter *painter, QRectF gridRect,
                                              const float derajat_EC,const float derajat_IC,
                                               const float derajat_EO,const float derajat_IO,
-                                              const float derajat_silinder, QVector<float> list_peak, int odd_event)
+                                              const float derajat_silinder, QVector<float> list_peak, int odd_event,
+                                              QString satuan_peak, QString satuan_suhu, QVector<float> suhu_list,
+                                              QStringList nama_silinder)
 {
 
     painter->save();
@@ -1161,7 +1161,7 @@ void AbstractSeriesChart::paintGrid_paradeVib(QPainter *painter, QRectF gridRect
     const qreal textPositionHOffset = valuesHMargin * 0.1;
     const qreal lebar_pixel = gridRect.right() - ( gridRect.left() + valuesHMargin + gridOffset.width());
     const float resolusi = lebar_pixel /  derajat_silinder;
-     qDebug()<<"<vi1 LR Derajat="<< derajat_silinder<<"Resolusi = "<<resolusi <<" lebar pixel= "<<lebar_pixel;
+  //   qDebug()<<"<vi1 LR Derajat="<< derajat_silinder<<"Resolusi = "<<resolusi <<" lebar pixel= "<<lebar_pixel;
 
     // Vertical axis lines
     const QTextOption verticalTextOption(Qt::AlignRight);
@@ -1191,29 +1191,21 @@ void AbstractSeriesChart::paintGrid_paradeVib(QPainter *painter, QRectF gridRect
    const qreal half_tinggiA = tinggiA/2;
    //int half_table = list_peak.size()/2;
    QString value;
-   //1 silindernya dari bawah
-//   for(int i=0; i<(list_peak.size()/2); i++){
-//       const qreal pos = (tinggiA*(i+1))+gridRect.bottom()-half_tinggiA;
-//       value.sprintf("%.1f",list_peak[i]);
-//       //painter->drawText(QPointF(gridRect.left(),pos),"("+QString::number(list_peak[i])+")");
-//       painter->drawText(QPointF(gridRect.left(),pos),"("+value+")");
-//   }
 
-   //putbal silinder 1 diatas
-//   for(int i=(list_peak.size()/2)-1; i>=0; i--){
-//       const qreal pos = (tinggiA*(i+1))+gridRect.bottom()-half_tinggiA;
-//       value.sprintf("%.1f",list_peak[i]);
-//       //painter->drawText(QPointF(gridRect.left(),pos),"("+QString::number(list_peak[i])+")");
-//       painter->drawText(QPointF(gridRect.left(),pos),"("+value+")");
-//   }
-
-  // for(int i=(list_peak.size()/2)-1; i>=0; i--){
    for(int i=0; i<(list_peak.size()/2); i++){
        const qreal pos = (tinggiA*((list_peak.size()/2)-(i)))+gridRect.bottom()-half_tinggiA;
-       value.sprintf("%.1f",list_peak[i]);
-       qDebug()<<"ini cek:"<<value;
-       //painter->drawText(QPointF(gridRect.left(),pos),"("+QString::number(list_peak[i])+")");
-       painter->drawText(QPointF(gridRect.left(),pos),"("+value+")");
+       value.sprintf("%.2f%s",list_peak[i],satuan_peak.toUtf8().data());
+  //     qDebug()<<"ini cek:"<<value<<list_peak.size()<<list_peak.size()/2;
+       QString data_suhu;
+       QString sil = nama_silinder[i];
+       data_suhu.sprintf("%.1f",suhu_list[i]);
+       QString text = QString(nama_silinder[i]+"\n("+value+")\n"+data_suhu+satuan_suhu);
+
+       painter->drawText(QRectF( gridRect.left()-(painter->fontMetrics().boundingRect(text).width()/4),
+                                    pos - (fontHeight),
+                                    painter->fontMetrics().boundingRect(text).width(),
+                                    fontHeight +fontHeight +fontHeight), Qt::AlignCenter,
+                                    text);
    }
 
     // Horizontal axis lines
@@ -1316,7 +1308,9 @@ void AbstractSeriesChart::paintGrid_paradeVib(QPainter *painter, QRectF gridRect
 void AbstractSeriesChart::paintGrid_paradeVib2(QPainter *painter, QRectF gridRect,
                                              const float derajat_EC,const float derajat_IC,
                                               const float derajat_EO,const float derajat_IO,
-                                              const float derajat_silinder, QVector<float> list_peak, int odd_event)
+                                              const float derajat_silinder, QVector<float> list_peak, int odd_event,
+                                               QString satuan_peak, QString satuan_suhu, QVector<float> suhu_list,
+                                               QStringList nama_silinder)
 {
 
     painter->save();
@@ -1340,7 +1334,7 @@ void AbstractSeriesChart::paintGrid_paradeVib2(QPainter *painter, QRectF gridRec
     const qreal textPositionHOffset = valuesHMargin * 0.1;
     const qreal lebar_pixel = gridRect.right() - ( gridRect.left() + valuesHMargin + gridOffset.width());
     const float resolusi = lebar_pixel /  derajat_silinder;
-     qDebug()<<"<vi2 LR Derajat="<< derajat_silinder<<"Resolusi = "<<resolusi <<" lebar pixel= "<<lebar_pixel;
+    // qDebug()<<"<vi2 LR Derajat="<< derajat_silinder<<"Resolusi = "<<resolusi <<" lebar pixel= "<<lebar_pixel;
 
     // Vertical axis lines
     const QTextOption verticalTextOption(Qt::AlignRight);
@@ -1388,13 +1382,22 @@ void AbstractSeriesChart::paintGrid_paradeVib2(QPainter *painter, QRectF gridRec
    QString value;
 
    for(int i=0; i<(list_peak.size()/2); i++){
-       value.sprintf("%.1f",list_peak[i+pos_pertama]);
+       value.sprintf("%.2f",list_peak[i+pos_pertama]);
        //const qreal pos = (tinggiA*(i+1))+gridRect.bottom()-half_tinggiA;
        const qreal pos = (tinggiA*((list_peak.size()/2)-i))+gridRect.bottom()-half_tinggiA;
        if((odd_event>0) && (i==(list_peak.size()/2)-1)){
 
        }else{
-        painter->drawText(QPointF(gridRect.left(),pos),"("+value+")");
+        //painter->drawText(QPointF(gridRect.left(),pos),"("+value+")");
+           QString data_suhu;
+           data_suhu.sprintf("%.1f",suhu_list[i+pos_pertama]);
+           QString text = QString(nama_silinder[i+pos_pertama]+"\n("+value+")\n"+data_suhu+satuan_suhu);
+
+           painter->drawText(QRectF( gridRect.left()-(painter->fontMetrics().boundingRect(text).width()/4),
+                                        pos - (fontHeight),
+                                        painter->fontMetrics().boundingRect(text).width(),
+                                        fontHeight +fontHeight +fontHeight), Qt::AlignCenter,
+                                        text);
        }
    }
 
@@ -1722,12 +1725,12 @@ void AbstractBarChart::paintChartLegend(QPainter *painter, QRectF legendRect, QV
         for (int i = 0 ; i < m_chartItem->series().size() ; ++i) {
             SeriesItem* series = m_chartItem->series().at(i);
 
-            //qDebug()<<"ApaintChartLegend:"<<series->name() <<counter ;
-            if (isHorizontal) {
-                drawHorizontalLegendItem(painter, i, series->name(), indicatorSize, indicatorsRect, series->color());
-            } else {
-                drawVerticalLegendItem(painter, i, series->name(), indicatorSize, indicatorsRect, series->color());
-            }
+                if (isHorizontal) {
+                    drawHorizontalLegendItem(painter, i, series->name(), indicatorSize, indicatorsRect, series->color());
+                } else {
+                    drawVerticalLegendItem(painter, i, series->name(), indicatorSize, indicatorsRect, series->color());
+                }
+
         }
     } else if (m_chartItem->itemMode() == DesignMode) {
         for (int i = 0 ; i < m_designLabels.size() ; ++i){
@@ -1776,6 +1779,9 @@ void AbstractBarChart::drawVerticalLegendItem(QPainter *painter, int i, const QS
 {
     const qreal y = i * painter->fontMetrics().height();
     painter->drawText(indicatorsRect.adjusted(indicatorSize+indicatorSize * 1.5, y, 0, 0),text);
+//    qDebug()<<"Vertic ChartLegend:"<<text <<i ;
+//    if(i%2)qDebug()<<"B"<<i;
+
     switch(m_chartItem->legendStyle()) {
     case ChartItem::LegendPoints: {
         painter->setBrush(indicatorColor);
@@ -1810,15 +1816,22 @@ void AbstractBarChart::drawHorizontalLegendItem(QPainter *painter, int i, const 
         return;
     const int column = i % columnWidths.size();
     const int row = std::floor(i / columnWidths.size());
+
     const qreal halfTextSize = painter->fontMetrics().height() / 2;
 
     const qreal x = indicatorsRect.x() + std::accumulate(columnWidths.cbegin(), columnWidths.cbegin() + column, 0.0);
     const qreal y = indicatorsRect.y() + (row + 1) * painter->fontMetrics().height();
-    painter->drawText(QPointF(x + indicatorSize * 1.5, y), text);
+
+//    painter->drawText(QPointF(x + indicatorSize * 1.5, y), text);
+
+//    qDebug()<<"Horiz ChartLegend:"<<text <<i ;
+//    if(i%2)qDebug()<<"A"<<i;
+
     switch(m_chartItem->legendStyle()) {
     case ChartItem::LegendPoints: {
         painter->setBrush(indicatorColor);
         painter->drawEllipse(x, y - halfTextSize, indicatorSize, indicatorSize);
+        painter->drawText(QPointF(x + indicatorSize * 1.5, y), text);
         break;
     }
     case ChartItem::LegendLines: {
@@ -1828,8 +1841,27 @@ void AbstractBarChart::drawHorizontalLegendItem(QPainter *painter, int i, const 
         painter->setPen(indicatorPen);
         painter->drawLine(x, y - halfTextSize * 0.7, x + indicatorSize, y - halfTextSize * 0.7);
         painter->setPen(tmpPen);
+        painter->drawText(QPointF(x + indicatorSize * 1.5, y), text);
         break;
     }
+    case ChartItem::LegendVibRecip: {
+        if(i%2){
+            //masih belum nemu hitungannya harusnya sisa nya masih banyak ke kanan
+//            const int columns = i-1 % columnWidths.size();
+//            const int rows = std::floor(i / columnWidths.size());
+            const qreal xs = indicatorsRect.x() + std::accumulate(columnWidths.cbegin(), columnWidths.cbegin() + (column-(column/2)), 0.0);
+            const qreal ys = indicatorsRect.y() + (row + 1) * painter->fontMetrics().height();
+           // qDebug()<<"pos:"<<i<<"col:"<<columns<<"row:"<<rows<<" x:" <<xs <<"y:"<< ys<<"==="<<columnWidths.size()<<"|"<<indicatorsRect.x()<<indicatorsRect.x();
+            painter->setBrush(indicatorColor);
+            painter->drawEllipse(xs, ys - halfTextSize, indicatorSize, indicatorSize);
+            painter->drawText(QPointF(xs + indicatorSize * 1.5, ys), text);
+        }
+        else{
+
+        }
+        break;
+    }
+
     }
 }
 

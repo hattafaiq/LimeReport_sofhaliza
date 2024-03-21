@@ -1091,51 +1091,51 @@ p, li { white-space: pre-wrap; }
 <context>
     <name>LimeReport::DataSourceManager</name>
     <message>
-        <location filename="../limereport/lrdatasourcemanager.cpp" line="435"/>
+        <location filename="../limereport/lrdatasourcemanager.cpp" line="440"/>
         <source>Connection &quot;%1&quot; is not open</source>
         <translation>Соединение &quot;%1&quot; не открыто</translation>
     </message>
     <message>
-        <location filename="../limereport/lrdatasourcemanager.cpp" line="1145"/>
+        <location filename="../limereport/lrdatasourcemanager.cpp" line="1150"/>
         <source>invalid connection</source>
         <translation>нет соединения</translation>
     </message>
     <message>
-        <location filename="../limereport/lrdatasourcemanager.cpp" line="471"/>
-        <location filename="../limereport/lrdatasourcemanager.cpp" line="490"/>
-        <location filename="../limereport/lrdatasourcemanager.cpp" line="535"/>
-        <location filename="../limereport/lrdatasourcemanager.cpp" line="574"/>
+        <location filename="../limereport/lrdatasourcemanager.cpp" line="476"/>
+        <location filename="../limereport/lrdatasourcemanager.cpp" line="495"/>
+        <location filename="../limereport/lrdatasourcemanager.cpp" line="540"/>
+        <location filename="../limereport/lrdatasourcemanager.cpp" line="579"/>
         <source>Variable &quot;%1&quot; not found!</source>
         <translation>Переменная &quot;%1&quot; не найдена!</translation>
     </message>
     <message>
-        <location filename="../limereport/lrdatasourcemanager.cpp" line="964"/>
+        <location filename="../limereport/lrdatasourcemanager.cpp" line="969"/>
         <source>Database &quot;%1&quot; not found</source>
         <translation>База данных &quot;%1&quot; не найдена</translation>
     </message>
     <message>
-        <location filename="../limereport/lrdatasourcemanager.cpp" line="777"/>
-        <location filename="../limereport/lrdatasourcemanager.cpp" line="1173"/>
+        <location filename="../limereport/lrdatasourcemanager.cpp" line="782"/>
+        <location filename="../limereport/lrdatasourcemanager.cpp" line="1178"/>
         <source>Datasource &quot;%1&quot; not found!</source>
         <translation>Источник данных &quot;%1&quot; не найден!</translation>
     </message>
     <message>
-        <location filename="../limereport/lrdatasourcemanager.cpp" line="874"/>
+        <location filename="../limereport/lrdatasourcemanager.cpp" line="879"/>
         <source>Connection with name &quot;%1&quot; already exists!</source>
         <translation>Соединение &quot;%1&quot; уже существует!</translation>
     </message>
     <message>
-        <location filename="../limereport/lrdatasourcemanager.cpp" line="899"/>
-        <location filename="../limereport/lrdatasourcemanager.cpp" line="908"/>
-        <location filename="../limereport/lrdatasourcemanager.cpp" line="917"/>
-        <location filename="../limereport/lrdatasourcemanager.cpp" line="924"/>
-        <location filename="../limereport/lrdatasourcemanager.cpp" line="933"/>
+        <location filename="../limereport/lrdatasourcemanager.cpp" line="904"/>
+        <location filename="../limereport/lrdatasourcemanager.cpp" line="913"/>
+        <location filename="../limereport/lrdatasourcemanager.cpp" line="922"/>
+        <location filename="../limereport/lrdatasourcemanager.cpp" line="929"/>
+        <location filename="../limereport/lrdatasourcemanager.cpp" line="938"/>
         <source>Datasource with name &quot;%1&quot; already exists!</source>
         <translation>Источник данных &quot;%1&quot; уже существует!</translation>
     </message>
     <message>
-        <location filename="../limereport/lrdatasourcemanager.cpp" line="529"/>
-        <location filename="../limereport/lrdatasourcemanager.cpp" line="568"/>
+        <location filename="../limereport/lrdatasourcemanager.cpp" line="534"/>
+        <location filename="../limereport/lrdatasourcemanager.cpp" line="573"/>
         <source>Unknown parameter &quot;%1&quot; for variable &quot;%2&quot; found!</source>
         <translation>Обнаружен неизвестный параметр &quot;%1&quot; для переменной &quot;%2&quot;!</translation>
     </message>
@@ -4630,17 +4630,17 @@ This preview is no longer valid.</source>
         <translation>Диаграмма</translation>
     </message>
     <message>
-        <location filename="../limereport/items/lrchartitem.cpp" line="690"/>
+        <location filename="../limereport/items/lrchartitem.cpp" line="688"/>
         <source>First</source>
         <translation>Первый</translation>
     </message>
     <message>
-        <location filename="../limereport/items/lrchartitem.cpp" line="690"/>
+        <location filename="../limereport/items/lrchartitem.cpp" line="688"/>
         <source>Second</source>
         <translation>Второй</translation>
     </message>
     <message>
-        <location filename="../limereport/items/lrchartitem.cpp" line="690"/>
+        <location filename="../limereport/items/lrchartitem.cpp" line="688"/>
         <source>Thrid</source>
         <translation>Третий</translation>
     </message>
