@@ -1,11 +1,10 @@
-#include "fh_gridlineschart_paradevib2.h"
-//#include "kumpulan_struct.h"
-//extern struct t_chart_parade_vib_recip vib_recip;
+#include "fh_gridlineschart_parade_ign.h"
+
 
 namespace LimeReport {
-void fh_gridlineschart_vibrecip2::paintChart(QPainter *painter, QRectF chartRect, QVector<float> timming, QVector<float> PeakAbs, int odd_evn
+void fh_gridlineschart_parade_ign::paintChart(QPainter *painter, QRectF chartRect, QVector<float> timming, QVector<float> PeakAbs, int odd_evn
                                              , QString satuan_peak,QString satuan_suhu, QVector<float> suhu_sil,QStringList nama_silinder,
-                                             QVector<float> peak_ign, QVector<float> derajat_ign, QString satuan_ign)
+                                              QVector<float> peak_ign, QVector<float> derajat_ign, QString satuan_ign)
 {
     updateMinAndMaxValues();
 
@@ -42,8 +41,8 @@ void fh_gridlineschart_vibrecip2::paintChart(QPainter *painter, QRectF chartRect
 //        qDebug()<<"->"<<PeakAbs[i];
 //    }
     qDebug()<<"pv2 cek nilai:"<<PeakAbs<<odd_evn<<satuan_peak<<satuan_suhu<<suhu_sil;
-    paintGrid_paradeVib2(painter, gridRect,timming[0],timming[2],timming[1],timming[3],timming[4],PeakAbs,odd_evn
-            ,satuan_peak, satuan_suhu, suhu_sil,nama_silinder);
+    paintGrid_paradeIGN(painter, gridRect,timming[0],timming[2],timming[1],timming[3],timming[4],PeakAbs,odd_evn
+            ,satuan_peak, satuan_suhu, suhu_sil,nama_silinder, peak_ign, derajat_ign, satuan_ign);
     paintSerialLines(
         painter,
         gridRect.adjusted(hPadding + valuesHMargin, 0, 0, 0)
@@ -51,7 +50,7 @@ void fh_gridlineschart_vibrecip2::paintChart(QPainter *painter, QRectF chartRect
     counter_paintGrid_paradeVib+=1;
 }
 
-void fh_gridlineschart_vibrecip2::paintSerialLines(QPainter* painter, QRectF barsRect)
+void fh_gridlineschart_parade_ign::paintSerialLines(QPainter* painter, QRectF barsRect)
 {
     if (valuesCount() == 0) return;
 
@@ -137,19 +136,9 @@ void fh_gridlineschart_vibrecip2::paintSerialLines(QPainter* painter, QRectF bar
 
         }
         tot_high+= fabs(peak_max-peak_min);
-//        float data_max = peak_max;
-//        float data_min = peak_min;
-      //  slast_data=startY + topMargin;
-        //tot_high+= fabs(peak_max-peak_min);
-//        qDebug()<<"berapa count chart:"<<counter << "| tinggi:"<<barsRect.height() << "last pos Y:"<< lastYPos;
-//        qDebug()<<"max:"<<peak_max<<"| min:"<<peak_min;
-//        qDebug()<<"smax:"<<speak_max<<"| smin:"<<speak_min;
-//        qDebug()<<"Y:"<<yAxisData.rangeMax() << yAxisData.rangeMin() << yAxisData.delta() << barsRect.height();
-//        qDebug()<<"X:"<<xAxisData.rangeMax() << xAxisData.rangeMin() << xAxisData.delta() << barsRect.width();
-
     }
     //--------------------------plot tambahan------------------------------//
-    float bagi_rata = tot_high/(counters/2);     /*mencari tinggi rata-rata kurva persilinder*/
+    float bagi_rata = tot_high/(counters);     /*mencari tinggi rata-rata kurva persilinder*/
     float mean_rata = bagi_rata/2;
 
     int counter=0;
@@ -209,28 +198,10 @@ void fh_gridlineschart_vibrecip2::paintSerialLines(QPainter* painter, QRectF bar
 
                 QPoint startPoint = QPoint(startX + leftMargin, startY + topMargin /*+ (mean_rata + (counters * bagi_rata)) */ );
                 QPoint endPoint = QPoint(endX + leftMargin, endY + topMargin /*+ (mean_rata + (counters * bagi_rata))*/ );
-                //drawSegment(painter, startPoint, endPoint, series->color());
-                if (((startPoint.y() <= barsRect.bottom()) && (startPoint.y() >= barsRect.top()))&&
-                    ((endPoint.y() <= barsRect.bottom()) && (endPoint.y() >= barsRect.top()))){
-                     /*if(counter<2)*/drawSegment(painter, startPoint, endPoint, series->color());
-                }
-         //   }
+                drawSegment(painter, startPoint, endPoint, series->color());
         }
-        //tot_high+= fabs(peak_max-peak_min);
-//        qDebug()<<"max:"<<peak_max<<"| min:"<<peak_min;
-//        qDebug()<<"berapa count chart:"<<counter << "| tinggi:"<<barsRect.height() << "last pos Y:"<< lastYPos;
-        if((counter%2)==0)sparators+=bagi_rata;
+       sparators+=bagi_rata;
     }
-
-//    for (SeriesItem* series : m_chartItem->series()){
-//        qDebug()<<"pos"<<counter<<":"<<(mean_rata + (counter * bagi_rata));
-//    }
-//        qDebug()<<"Y:"<<yAxisData.rangeMax() << yAxisData.rangeMin() << yAxisData.delta() << barsRect.height();
-//        qDebug()<<"X:"<<xAxisData.rangeMax() << xAxisData.rangeMin() << xAxisData.delta() << barsRect.width();
-//        qDebug()<<"tot:"<<tot_high<<"| bagi rat:"<<bagi_rata<<" |mean rat:"<<mean_rata;
-
-
-
     painter->restore();
 }
 }

@@ -139,5 +139,11 @@ CONFIG(build_translations) {
     POST_TARGETDEPS +=  qm
 }
 
+
+
+
 #### EN AUTOMATIC TRANSLATIONS
 
+unix:!macx: LIBS += -L$$PWD/../../../../Qt5.12.12/5.12.12/gcc_64/lib/ -lqwt
+INCLUDEPATH += $$PWD/../../../../Qt5.12.12/5.12.12/gcc_64/include
+DEPENDPATH += $$PWD/../../../../Qt5.12.12/5.12.12/gcc_64/include

@@ -31,7 +31,8 @@ void PieChart::drawPercent(QPainter *painter, QRectF chartRect, qreal startAngle
 }
 
 void PieChart::paintChart(QPainter *painter, QRectF chartRect, QVector<float> timming, QVector<float> PeakAbs, int odd_evn
-                          , QString satuan_peak,QString satuan_suhu, QVector<float> suhu_sil,QStringList nama_silinder)
+                          , QString satuan_peak,QString satuan_suhu, QVector<float> suhu_sil,QStringList nama_silinder,
+                          QVector<float> peak_ign, QVector<float> derajat_ign, QString satuan_ign)
 {
     painter->save();
     QPen pen(Qt::white);

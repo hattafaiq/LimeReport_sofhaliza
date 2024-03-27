@@ -3,7 +3,8 @@
 namespace LimeReport{
 
 void HorizontalBarChart::paintChart(QPainter *painter, QRectF chartRect, QVector<float> timming, QVector<float> PeakAbs, int odd_evn
-                                    , QString satuan_peak,QString satuan_suhu, QVector<float> suhu_sil,QStringList nama_silinder_vib)
+                                    , QString satuan_peak,QString satuan_suhu, QVector<float> suhu_sil,QStringList nama_silinder_vib,
+                                    QVector<float> peak_ign, QVector<float> derajat_ign, QString satuan_ign)
 {
     updateMinAndMaxValues();
 

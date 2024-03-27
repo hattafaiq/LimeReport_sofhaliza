@@ -75,7 +75,8 @@ public:
     AbstractChart(ChartItem* chartItem);
     virtual ~AbstractChart(){}
     virtual void paintChart(QPainter *painter, QRectF rect, QVector<float> timming, QVector<float> PeakAbs, int odd_evn,
-                            QString satuan_peak,QString satuan_suhu, QVector<float> suhu_sil,QStringList nama_silinder) = 0;
+                            QString satuan_peak,QString satuan_suhu, QVector<float> suhu_sil,QStringList nama_silinder,
+                            QVector<float> peak_ign, QVector<float> derajat_ign, QString satuan_ign) = 0;
     virtual void paintChartLegend(QPainter *painter, QRectF legendRect, QVector<float> timming) =0;
     virtual QSizeF calcChartLegendSize(const QFont &font, qreal maxWidth = 0) = 0;
     virtual QRectF calcChartLegendRect(const QFont& font, const QRectF& parentRect, bool takeAllRect, qreal borderMargin, qreal titleOffset);
@@ -122,6 +123,7 @@ protected:
                                      QVector<float> list_peak, int odd_event,
                                      QString satuan_peak, QString satuan_suhu, QVector<float> suhu_list,
                                      QStringList nama_silinder);
+
     virtual void paintGrid_paradeVib2(QPainter *painter, QRectF gridRect,
                                      const float derajat_EC,const float derajat_IC,
                                      const float derajat_EO,const float derajat_IO,
@@ -129,6 +131,22 @@ protected:
                                      QVector<float> list_peak, int odd_event,
                                      QString satuan_peak, QString satuan_suhu, QVector<float> suhu_list,
                                      QStringList nama_silinder);
+
+    virtual void paintGrid_paradeIGN(QPainter *painter, QRectF gridRect,
+                                     const float derajat_EC,const float derajat_IC,
+                                     const float derajat_EO,const float derajat_IO,
+                                     const float derajat_silinder,
+                                     QVector<float> list_peak, int odd_event,
+                                     QString satuan_peak, QString satuan_suhu, QVector<float> suhu_list,
+                                     QStringList nama_silinder,
+                                     QVector<float> peak_ign, QVector<float> derajat_ign, QString satuan_ign);
+
+   virtual void paintGrid_paradeIGN2(QPainter *painter, QRectF gridRect,
+                                    const float derajat_EC,const float derajat_IC,
+                                    const float derajat_EO,const float derajat_IO,
+                                    const float derajat_silinder, QVector<float> list_peak, int odd_event,
+                                    QString satuan_peak, QString satuan_suhu, QVector<float> suhu_list,
+                                    QStringList nama_silinder,QVector<float> peak_ign, QVector<float> derajat_ign, QString satuan_ign);
 
     virtual void paintVerticalGrid(QPainter *painter, QRectF gridRect);
     virtual void drawSegment(QPainter *painter, QPoint startPoint, QPoint endPoint, QColor color);
@@ -194,7 +212,8 @@ public:
                        LegendAlignBottomLeft,LegendAlignBottomCenter,LegendAlignBottomRight};
     enum LegendStyle{LegendPoints, LegendLines, LegendVibRecip};
     enum TitleAlign{TitleAlignLeft, TitleAlignCenter, TitleAlignRight};
-    enum ChartType{Pie, VerticalBar, HorizontalBar, Lines, GridLines, GridLines_paradeVib, GridLines_paradeVib2};
+    enum ChartType{Pie, VerticalBar, HorizontalBar, Lines, GridLines, GridLines_paradeVib, GridLines_paradeVib2,GridLines_paradeISEC
+                  ,GridLines_paradeISEC2};
     enum LineType {
         NoLine = 0,
         HorizontalLine = 1,
@@ -213,6 +232,10 @@ public:
     QString suhu_satuan;
     QVector<float> suhu_val;
      QStringList nama_silinder;
+
+     QVector<float> peak_ign;
+     QVector<float> derajat_ign;
+     QString satuan_ign;
 
 #if QT_VERSION >= 0x050500
     Q_ENUM(LegendAlign)

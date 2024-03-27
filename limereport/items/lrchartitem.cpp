@@ -17,6 +17,10 @@
 #include "charts/lrgridlineschart.h"
 #include "charts/fh_gridlineschart_paradevib.h"
 #include "charts/fh_gridlineschart_paradevib2.h"
+#include "charts/fh_gridlineschart_parade_ign.h"
+#include "charts/fh_gridlineschart_parade_ign2.h"
+
+#include "qwt_plot_canvas.h"
 
 
 namespace{
@@ -32,7 +36,6 @@ bool registred = LimeReport::DesignElementsFactory::instance().registerCreator(
 }
 
 namespace LimeReport{
-
 
 QColor generateColor()
 {
@@ -112,10 +115,15 @@ void SeriesItem::fillSeriesData(IDataSource *dataSource)
         dataSource->first();
         int currentColorIndex = 0;
         while(!dataSource->eof()){
-            if (!m_labelsColumn.isEmpty())
+            if (!m_labelsColumn.isEmpty()){
                 m_data.labels().append(dataSource->data(m_labelsColumn).toString());
-            if (!m_xAxisColumn.isEmpty())
+                qDebug()<<"lab:"<<dataSource->data(m_labelsColumn).toString();
+            }
+            if (!m_xAxisColumn.isEmpty()){
                 m_data.xAxisValues().append(dataSource->data(m_xAxisColumn).toDouble());
+                qDebug()<<"Xaxis:"<<dataSource->data(m_xAxisColumn).toDouble();
+            }
+            qDebug()<<"data:"<<dataSource->data(m_valuesColumn).toDouble();
             m_data.values().append(dataSource->data(m_valuesColumn).toDouble());
             m_data.colors().append((currentColorIndex<32)?color_map[currentColorIndex]:generateColor());
             dataSource->next();
@@ -223,12 +231,8 @@ void ChartItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
             break;
         }
     }
-     QVector<float> timming;
-     QVector<float> timming2;
-//     qDebug()<<"<LR masuk 10>-------------------------------------->"<<timming_EC
-//                                                                     <<timming_EO
-//                                                                     <<timming_IC
-//                                                                     <<timming_IO;
+
+    QVector<float> timming;
      timming.push_back( timming_EC);
      timming.push_back( timming_EO);
      timming.push_back( timming_IC);
@@ -239,7 +243,9 @@ void ChartItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
     if (m_showLegend)
         m_chart->paintChartLegend(painter,legendRect,timming);
    // qDebug()<<"1 cek nilai:"<<peak_data<<even_odd<<peak_satuan<<suhu_satuan<<suhu_val;
-    m_chart->paintChart(painter,diagramRect,timming,peak_data,even_odd,peak_satuan,suhu_satuan,suhu_val,nama_silinder);
+
+    m_chart->paintChart(painter,diagramRect,timming,peak_data,even_odd,peak_satuan,suhu_satuan,suhu_val,nama_silinder,
+                        peak_ign,derajat_ign,satuan_ign);
 
     painter->restore();
     ItemDesignIntf::paint(painter,option,widget);
@@ -346,6 +352,9 @@ void ChartItem::updateItemSize(DataSourceManager *dataManager, RenderPass , int 
     suhu_satuan  = dataManager->suhu_satuans;
     suhu_val = dataManager->list_suhu;
     nama_silinder = dataManager->list_silinder;
+    peak_ign = dataManager->peak_igns;
+    derajat_ign = dataManager->derajat_igns;
+    satuan_ign = dataManager->satuan_igns;
 }
 
 void ChartItem::fillLabels(IDataSource *dataSource)
@@ -453,6 +462,12 @@ void ChartItem::setChartType(const ChartType &chartType)
             break;
         case GridLines_paradeVib2:
             m_chart = new fh_gridlineschart_vibrecip2(this);
+            break;
+        case GridLines_paradeISEC:
+            m_chart = new fh_gridlineschart_parade_ign(this);
+            break;
+        case GridLines_paradeISEC2:
+            m_chart = new fh_gridlineschart_parade_ign2(this);
             break;
         }
         m_chart->setTitleFont(oldTitleFont);
@@ -1305,6 +1320,395 @@ void AbstractSeriesChart::paintGrid_paradeVib(QPainter *painter, QRectF gridRect
     painter->restore();
 }
 
+void AbstractSeriesChart::paintGrid_paradeIGN(QPainter *painter, QRectF gridRect,
+                                             const float derajat_EC,const float derajat_IC,
+                                              const float derajat_EO,const float derajat_IO,
+                                              const float derajat_silinder, QVector<float> list_peak, int odd_event,
+                                              QString satuan_peak, QString satuan_suhu, QVector<float> suhu_list,
+                                              QStringList nama_silinder,
+                                              QVector<float> peak_ign, QVector<float> derajat_ign, QString satuan_ign)
+{
+
+    painter->save();
+
+    const AxisData &yAxisData = this->yAxisData();
+    AxisData &xAxisData = this->xAxisData();
+
+    painter->setRenderHint(QPainter::Antialiasing,false);
+
+    const int xAxisSegmentCount = xAxisData.segmentCount();
+    const int xAxisLineCount = xAxisSegmentCount + 1;
+    const int yAxisSegmentCount = yAxisData.segmentCount();
+    const int yAxisLineCount = yAxisSegmentCount + 1;
+
+    const int fontHeight = painter->fontMetrics().height();
+    const int halfFontHeight = fontHeight / 2;
+    const QSizeF gridOffset = QSizeF(hPadding(gridRect), vPadding(gridRect));
+    const qreal valuesHMargin = this->valuesHMargin(painter);
+    const qreal vStep = gridRect.height() / yAxisSegmentCount;
+    const qreal hStep = (gridRect.width() - valuesHMargin - gridOffset.width()) / xAxisSegmentCount;
+    const qreal textPositionHOffset = valuesHMargin * 0.1;
+    const qreal lebar_pixel = gridRect.right() - ( gridRect.left() + valuesHMargin + gridOffset.width());
+    const float resolusi = lebar_pixel /  derajat_silinder;
+  //   qDebug()<<"<vi1 LR Derajat="<< derajat_silinder<<"Resolusi = "<<resolusi <<" lebar pixel= "<<lebar_pixel;
+
+    // Vertical axis lines
+    const QTextOption verticalTextOption(Qt::AlignRight);
+
+    for (int i = 0 ; i < yAxisLineCount ; i++ ) {
+        const qreal y = vStep * i;
+        const bool drawFullLine = m_chartItem->gridChartLines() & ChartItem::HorizontalLine
+                                  || i == 0 || i == xAxisSegmentCount;
+
+        QPointF lineEndPos = gridRect.bottomRight() - QPointF(0, y);
+
+        if (!drawFullLine) {
+            lineEndPos.setX(gridRect.left() + valuesHMargin + gridOffset.width());
+        }
+        else{
+            painter->drawLine(gridRect.bottomLeft() - QPointF(-valuesHMargin- gridOffset.width(), y), lineEndPos);}
+    }
+
+//    const qreal tinggi_graph = gridRect.top()+gridRect.bottom();
+//    int jumlah_data = (peak_ign.size()/2);
+// //   const qreal peak_step = tinggi_graph / jumlah_data;
+//  //  const qreal tinggi_pakai = tinggi_graph - peak_step;
+////    const qreal peak_step_pakai = tinggi_pakai/9;
+////    const qreal half_pos = peak_step/2;
+
+   const qreal tinggiA = (gridRect.top()-gridRect.bottom())/(peak_ign.size()/2);
+   const qreal half_tinggiA = tinggiA/2;
+   //int half_table = peak_ign.size()/2;
+   QString value;
+
+   for(int i=0; i<(peak_ign.size()/2); i++){
+       const qreal pos = (tinggiA*((peak_ign.size()/2)-(i)))+gridRect.bottom()-half_tinggiA;
+       value.sprintf("%.2f%s",peak_ign[i],satuan_ign.toUtf8().data());
+  //     qDebug()<<"ini cek:"<<value<<peak_ign.size()<<peak_ign.size()/2;
+       QString data_suhu;
+       QString sil = nama_silinder[i];
+       data_suhu.sprintf("%.1f",derajat_ign[i]);
+       QString text = QString(nama_silinder[i]+"\n("+value+")\n"+data_suhu+satuan_suhu);
+
+       painter->drawText(QRectF( gridRect.left()-(painter->fontMetrics().boundingRect(text).width()/4),
+                                    pos - (fontHeight),
+                                    painter->fontMetrics().boundingRect(text).width(),
+                                    fontHeight +fontHeight +fontHeight), Qt::AlignCenter,
+                                    text);
+   }
+
+    // Horizontal axis lines
+    for (int i = 0 ; i < xAxisLineCount ; i++) {
+        const qreal x = gridRect.left() + hStep * i + valuesHMargin + gridOffset.width();
+        const bool drawFullLine = m_chartItem->gridChartLines() & ChartItem::VerticalLine
+                                  || i == 0 || i == xAxisSegmentCount;
+        const QString text = axisLabel(i, xAxisData);
+
+        if (m_chartItem->horizontalAxisOnTop()) {
+            painter->drawLine(x, gridRect.top() - gridOffset.height(),
+                              x, (drawFullLine ? gridRect.bottom() : gridRect.top()));
+            painter->drawText(QRectF(x - painter->fontMetrics().boundingRect(text).width() / 2,
+                                     gridRect.top() - (fontHeight + gridOffset.height()),
+                                     hStep, fontHeight),
+                              text);
+        } else {
+            painter->drawLine(x, gridRect.bottom() + gridOffset.height(),
+                              x, (drawFullLine ? gridRect.top() : gridRect.bottom()));
+            painter->drawText(QRectF(x - painter->fontMetrics().boundingRect(text).width() / 2,
+                                     gridRect.bottom() + halfFontHeight * 0 + gridOffset.height(),
+                                     hStep, fontHeight),
+                              text);
+        }
+    }
+    QString offset_top = "0";
+    QString text_EC = "EC\n"+QString::number(derajat_EC);
+    QString text_IC = "IC\n"+QString::number(derajat_IC);
+    QString text_EO = "EO\n"+QString::number(derajat_EO);
+    QString text_IO = "IO\n"+QString::number(derajat_IO);
+
+//    const qreal lebar_pixel_top = gridRect.right() - ( gridRect.left());
+//    const float resolusi_top = lebar_pixel_top /  derajat_silinder;
+
+//    const float pos_EC_top = ((float) derajat_EC * resolusi_top) + ((float) gridRect.left() /*+ 5 + (float) gridOffset.width()*/);
+//    const float pos_IC_top = ((float) derajat_IC * resolusi_top) + ((float) gridRect.left() /*+ 5 + (float) gridOffset.width()*/);
+//    const float pos_EO_top = ((float) derajat_EO * resolusi_top) + ((float) gridRect.left() /*+ 5 + (float) gridOffset.width()*/);
+//    const float pos_IO_top = ((float) derajat_IO * resolusi_top) + ((float) gridRect.left() /*+ 5 + (float) gridOffset.width()*/);
+
+
+    const float pos_EC = ((float) derajat_EC * resolusi) + ((float) gridRect.left() + (float) valuesHMargin + (float) gridOffset.width());
+    const float pos_IC = ((float) derajat_IC * resolusi) + ((float) gridRect.left() + (float) valuesHMargin + (float) gridOffset.width());
+    const float pos_EO = ((float) derajat_EO * resolusi) + ((float) gridRect.left() + (float) valuesHMargin + (float) gridOffset.width());
+    const float pos_IO = ((float) derajat_IO * resolusi) + ((float) gridRect.left() + (float) valuesHMargin + (float) gridOffset.width());
+
+
+
+    //top
+    painter->setPen(Qt::red);
+    painter->drawText(QRectF( pos_EC -painter->fontMetrics().boundingRect(text_EC).width() / 2,
+                                 gridRect.top() - (fontHeight +fontHeight + gridOffset.height()),
+                                 painter->fontMetrics().boundingRect(text_EC).width(),  fontHeight +fontHeight), Qt::AlignCenter,
+                                 text_EC);
+    painter->drawLine(pos_EC,gridRect.bottom()/*- gridOffset.height()*/,pos_EC,gridRect.top());
+
+    //top
+    painter->setPen(Qt::blue);
+    painter->drawText(QRectF(pos_IC -painter->fontMetrics().boundingRect(text_IC).width() / 2,
+                             gridRect.top() - (fontHeight +fontHeight + gridOffset.height()),
+                             painter->fontMetrics().boundingRect(text_IC).width(),  fontHeight +fontHeight), Qt::AlignCenter,
+                             text_IC);
+    painter->drawLine(pos_IC,gridRect.bottom()/*- gridOffset.height()*/,pos_IC,gridRect.top() );
+
+    //top
+    painter->setPen(Qt::red);
+    painter->drawText(QRectF(pos_EO -painter->fontMetrics().boundingRect(text_EO).width() / 2,
+                             gridRect.top() - (fontHeight +fontHeight + gridOffset.height()),
+                             painter->fontMetrics().boundingRect(text_EO).width(),  fontHeight +fontHeight), Qt::AlignCenter,
+                             text_EO);
+    painter->drawLine(pos_EO,gridRect.bottom()/*- gridOffset.height()*/,pos_EO,gridRect.top() );
+
+    //top
+    painter->setPen(Qt::blue);
+    painter->drawText(QRectF(pos_IO -painter->fontMetrics().boundingRect(text_IO).width() / 2,
+                             gridRect.top() - (fontHeight +fontHeight + gridOffset.height()),
+                             painter->fontMetrics().boundingRect(text_IO).width(),  fontHeight +fontHeight), Qt::AlignCenter,
+                             text_IO);
+    painter->drawLine(pos_IO,gridRect.bottom()/*- gridOffset.height()*/,pos_IO,gridRect.top() );
+    painter->setPen(Qt::black);
+
+    //bottom
+    //    painter->drawText(QRectF(pos_IC - painter->fontMetrics().boundingRect(QString::number(derajat_IC)).width() / 2,
+    //                              gridRect.bottom() + halfFontHeight * 0 + gridOffset.height() + fontHeight,
+    //                              hStep, fontHeight + fontHeight), Qt::AlignCenter, text_IC);
+
+    //bottom
+    //    painter->drawText(QRectF(pos_EC - painter->fontMetrics().boundingRect(QString::number(derajat_EC)).width() / 2,
+    //                             gridRect.bottom() + halfFontHeight * 0 + gridOffset.height() + fontHeight,
+    //                             hStep, fontHeight + fontHeight),Qt::AlignCenter,
+    //                             text_EC);
+
+    //    painter->drawText(QRectF(pos_EO - painter->fontMetrics().boundingRect(QString::number(derajat_EO)).width() / 2,
+    //                             gridRect.bottom() + halfFontHeight * 0 + gridOffset.height() + fontHeight,
+    //                             hStep, fontHeight + fontHeight), Qt::AlignCenter,
+    //                             text_EO);
+
+    painter->restore();
+}
+
+void AbstractSeriesChart::paintGrid_paradeIGN2(QPainter *painter, QRectF gridRect,
+                                             const float derajat_EC,const float derajat_IC,
+                                              const float derajat_EO,const float derajat_IO,
+                                              const float derajat_silinder, QVector<float> list_peak, int odd_event,
+                                               QString satuan_peak, QString satuan_suhu, QVector<float> suhu_list,
+                                               QStringList nama_silinder,QVector<float> peak_ign, QVector<float> derajat_ign, QString satuan_ign)
+{
+
+    painter->save();
+
+    const AxisData &yAxisData = this->yAxisData();
+    AxisData &xAxisData = this->xAxisData();
+
+    painter->setRenderHint(QPainter::Antialiasing,false);
+
+    const int xAxisSegmentCount = xAxisData.segmentCount();
+    const int xAxisLineCount = xAxisSegmentCount + 1;
+    const int yAxisSegmentCount = yAxisData.segmentCount();
+    const int yAxisLineCount = yAxisSegmentCount + 1;
+
+    const int fontHeight = painter->fontMetrics().height();
+    const int halfFontHeight = fontHeight / 2;
+    const QSizeF gridOffset = QSizeF(hPadding(gridRect), vPadding(gridRect));
+    const qreal valuesHMargin = this->valuesHMargin(painter);
+    const qreal vStep = gridRect.height() / yAxisSegmentCount;
+    const qreal hStep = (gridRect.width() - valuesHMargin - gridOffset.width()) / xAxisSegmentCount;
+    const qreal textPositionHOffset = valuesHMargin * 0.1;
+    const qreal lebar_pixel = gridRect.right() - ( gridRect.left() + valuesHMargin + gridOffset.width());
+    const float resolusi = lebar_pixel /  derajat_silinder;
+    // qDebug()<<"<vi2 LR Derajat="<< derajat_silinder<<"Resolusi = "<<resolusi <<" lebar pixel= "<<lebar_pixel;
+
+    // Vertical axis lines
+    const QTextOption verticalTextOption(Qt::AlignRight);
+
+    for (int i = 0 ; i < yAxisLineCount ; i++ ) {
+        const qreal y = vStep * i;
+        const bool drawFullLine = m_chartItem->gridChartLines() & ChartItem::HorizontalLine
+                                  || i == 0 || i == xAxisSegmentCount;
+
+        QPointF lineEndPos = gridRect.bottomRight() - QPointF(0, y);
+
+        if (!drawFullLine) {
+            lineEndPos.setX(gridRect.left() + valuesHMargin + gridOffset.width());
+        }
+        else{
+            painter->drawLine(gridRect.bottomLeft() - QPointF(-valuesHMargin- gridOffset.width(), y), lineEndPos);}
+    }
+
+    const qreal tinggi_graph = gridRect.top()+gridRect.bottom();
+    const qreal peak_step = tinggi_graph / 9;
+    const qreal tinggi_pakai = tinggi_graph - peak_step;
+    const qreal peak_step_pakai = tinggi_pakai/9;
+    const qreal half_pos = peak_step/2;
+//   for (int i = 0 ; i < 10 ; i++ ) {
+//       const qreal y = peak_step_pakai * i;
+////                painter->drawText(QRectF(gridRect.bottomLeft()-QPointF(textPositionHOffset, y + halfFontHeight),
+////                                                 QSizeF(valuesHMargin,fontHeight)),
+////                                          "x"/*axisLabel(i, yAxisData)*/,
+////                                          verticalTextOption);
+
+//            }
+//   painter->drawText(QPointF(0,0),"0");
+//   painter->drawText(QPointF(0,100),"0,100");
+//   painter->drawText(QPointF(0,200),"0,200");
+//   painter->drawText(QPointF(100,0),"100,0");
+//   painter->drawText(QPointF(200,0),"200,0");
+
+//   painter->drawText(QPointF(gridRect.left(),gridRect.top()),"(l,t)");
+//   painter->drawText(QPointF(gridRect.left(),gridRect.bottom()),"(l,b)");
+
+   const qreal tinggiA = (gridRect.top()-gridRect.bottom())/(peak_ign.size()/2);
+   const qreal half_tinggiA = tinggiA/2;
+   //int half_table = peak_ign.size()/2;
+   int pos_pertama = peak_ign.size()/2;
+   QString value;
+
+   for(int i=0; i<(peak_ign.size()/2); i++){
+       value.sprintf("%.2f",peak_ign[i+pos_pertama]);
+       //const qreal pos = (tinggiA*(i+1))+gridRect.bottom()-half_tinggiA;
+       const qreal pos = (tinggiA*((peak_ign.size()/2)-i))+gridRect.bottom()-half_tinggiA;
+//       if((odd_event>0) && (i==(peak_ign.size()/2)-1)){
+
+//       }else{
+        //painter->drawText(QPointF(gridRect.left(),pos),"("+value+")");
+           QString data_suhu;
+           data_suhu.sprintf("%.1f",derajat_ign[i+pos_pertama]);
+           QString text = QString(nama_silinder[i+pos_pertama]+"\n("+value+")\n"+data_suhu+satuan_ign);
+
+           painter->drawText(QRectF( gridRect.left()-(painter->fontMetrics().boundingRect(text).width()/4),
+                                        pos - (fontHeight),
+                                        painter->fontMetrics().boundingRect(text).width(),
+                                        fontHeight +fontHeight +fontHeight), Qt::AlignCenter,
+                                        text);
+//       }
+   }
+
+//   for(int i=1; i<10; i++){
+//       const qreal pos = tinggiA*i;
+//       painter->drawText(QPointF(gridRect.left()+20,pos),"0");
+//   }
+
+
+//   painter->drawText(QRectF(gridRect.bottomLeft()-QPointF(textPositionHOffset,100),
+//                                    QSizeF(valuesHMargin,fontHeight)),
+//                             "100"/*axisLabel(i, yAxisData)*/,
+//                             verticalTextOption);
+//   painter->drawText(QRectF(gridRect.bottomLeft()-QPointF(textPositionHOffset,0),
+//                                    QSizeF(valuesHMargin,fontHeight)),
+//                             "0"/*axisLabel(i, yAxisData)*/,
+//                             verticalTextOption);
+
+//   painter->drawText(QRectF(gridRect.bottomLeft()-QPointF(textPositionHOffset,0),
+//                                    QSizeF(valuesHMargin,fontHeight)),
+//                             "0"/*axisLabel(i, yAxisData)*/,
+//                             verticalTextOption);
+
+
+    // Horizontal axis lines
+    for (int i = 0 ; i < xAxisLineCount ; i++) {
+        const qreal x = gridRect.left() + hStep * i + valuesHMargin + gridOffset.width();
+        const bool drawFullLine = m_chartItem->gridChartLines() & ChartItem::VerticalLine
+                                  || i == 0 || i == xAxisSegmentCount;
+        const QString text = axisLabel(i, xAxisData);
+
+        if (m_chartItem->horizontalAxisOnTop()) {
+            painter->drawLine(x, gridRect.top() - gridOffset.height(),
+                              x, (drawFullLine ? gridRect.bottom() : gridRect.top()));
+            painter->drawText(QRectF(x - painter->fontMetrics().boundingRect(text).width() / 2,
+                                     gridRect.top() - (fontHeight + gridOffset.height()),
+                                     hStep, fontHeight),
+                              text);
+        } else {
+            painter->drawLine(x, gridRect.bottom() + gridOffset.height(),
+                              x, (drawFullLine ? gridRect.top() : gridRect.bottom()));
+            painter->drawText(QRectF(x - painter->fontMetrics().boundingRect(text).width() / 2,
+                                     gridRect.bottom() + halfFontHeight * 0 + gridOffset.height(),
+                                     hStep, fontHeight),
+                              text);
+        }
+    }
+    QString offset_top = "0";
+    QString text_EC = "EC\n"+QString::number(derajat_EC);
+    QString text_IC = "IC\n"+QString::number(derajat_IC);
+    QString text_EO = "EO\n"+QString::number(derajat_EO);
+    QString text_IO = "IO\n"+QString::number(derajat_IO);
+
+    const qreal lebar_pixel_top = gridRect.right() - ( gridRect.left());
+    const float resolusi_top = lebar_pixel_top /  derajat_silinder;
+
+    const float pos_EC_top = ((float) derajat_EC * resolusi_top) + ((float) gridRect.left() /*+ 5 + (float) gridOffset.width()*/);
+    const float pos_IC_top = ((float) derajat_IC * resolusi_top) + ((float) gridRect.left() /*+ 5 + (float) gridOffset.width()*/);
+    const float pos_EO_top = ((float) derajat_EO * resolusi_top) + ((float) gridRect.left() /*+ 5 + (float) gridOffset.width()*/);
+    const float pos_IO_top = ((float) derajat_IO * resolusi_top) + ((float) gridRect.left() /*+ 5 + (float) gridOffset.width()*/);
+
+
+    const float pos_EC = ((float) derajat_EC * resolusi) + ((float) gridRect.left() + (float) valuesHMargin + (float) gridOffset.width());
+    const float pos_IC = ((float) derajat_IC * resolusi) + ((float) gridRect.left() + (float) valuesHMargin + (float) gridOffset.width());
+    const float pos_EO = ((float) derajat_EO * resolusi) + ((float) gridRect.left() + (float) valuesHMargin + (float) gridOffset.width());
+    const float pos_IO = ((float) derajat_IO * resolusi) + ((float) gridRect.left() + (float) valuesHMargin + (float) gridOffset.width());
+
+
+
+    //top
+    painter->setPen(Qt::red);
+    painter->drawText(QRectF( pos_EC -painter->fontMetrics().boundingRect(text_EC).width() / 2,
+                                 gridRect.top() - (fontHeight +fontHeight + gridOffset.height()),
+                                 painter->fontMetrics().boundingRect(text_EC).width(),  fontHeight +fontHeight), Qt::AlignCenter,
+                                 text_EC);
+    painter->drawLine(pos_EC,gridRect.bottom()/*- gridOffset.height()*/,pos_EC,gridRect.top());
+
+    //top
+    painter->setPen(Qt::blue);
+    painter->drawText(QRectF(pos_IC -painter->fontMetrics().boundingRect(text_IC).width() / 2,
+                             gridRect.top() - (fontHeight +fontHeight + gridOffset.height()),
+                             painter->fontMetrics().boundingRect(text_IC).width(),  fontHeight +fontHeight), Qt::AlignCenter,
+                             text_IC);
+    painter->drawLine(pos_IC,gridRect.bottom()/*- gridOffset.height()*/,pos_IC,gridRect.top() );
+
+    //top
+    painter->setPen(Qt::red);
+    painter->drawText(QRectF(pos_EO -painter->fontMetrics().boundingRect(text_EO).width() / 2,
+                             gridRect.top() - (fontHeight +fontHeight + gridOffset.height()),
+                             painter->fontMetrics().boundingRect(text_EO).width(),  fontHeight +fontHeight), Qt::AlignCenter,
+                             text_EO);
+    painter->drawLine(pos_EO,gridRect.bottom()/*- gridOffset.height()*/,pos_EO,gridRect.top() );
+
+    //top
+    painter->setPen(Qt::blue);
+    painter->drawText(QRectF(pos_IO -painter->fontMetrics().boundingRect(text_IO).width() / 2,
+                             gridRect.top() - (fontHeight +fontHeight + gridOffset.height()),
+                             painter->fontMetrics().boundingRect(text_IO).width(),  fontHeight +fontHeight), Qt::AlignCenter,
+                             text_IO);
+    painter->drawLine(pos_IO,gridRect.bottom()/*- gridOffset.height()*/,pos_IO,gridRect.top() );
+    painter->setPen(Qt::black);
+
+    //bottom
+    //    painter->drawText(QRectF(pos_IC - painter->fontMetrics().boundingRect(QString::number(derajat_IC)).width() / 2,
+    //                              gridRect.bottom() + halfFontHeight * 0 + gridOffset.height() + fontHeight,
+    //                              hStep, fontHeight + fontHeight), Qt::AlignCenter, text_IC);
+
+    //bottom
+    //    painter->drawText(QRectF(pos_EC - painter->fontMetrics().boundingRect(QString::number(derajat_EC)).width() / 2,
+    //                             gridRect.bottom() + halfFontHeight * 0 + gridOffset.height() + fontHeight,
+    //                             hStep, fontHeight + fontHeight),Qt::AlignCenter,
+    //                             text_EC);
+
+    //    painter->drawText(QRectF(pos_EO - painter->fontMetrics().boundingRect(QString::number(derajat_EO)).width() / 2,
+    //                             gridRect.bottom() + halfFontHeight * 0 + gridOffset.height() + fontHeight,
+    //                             hStep, fontHeight + fontHeight), Qt::AlignCenter,
+    //                             text_EO);
+
+    painter->restore();
+}
+
+
 void AbstractSeriesChart::paintGrid_paradeVib2(QPainter *painter, QRectF gridRect,
                                              const float derajat_EC,const float derajat_IC,
                                               const float derajat_EO,const float derajat_IO,
@@ -1518,6 +1922,8 @@ void AbstractSeriesChart::paintGrid_paradeVib2(QPainter *painter, QRectF gridRec
 
     painter->restore();
 }
+
+
 
 void AbstractSeriesChart::drawSegment(QPainter *painter, QPoint startPoint, QPoint endPoint, QColor color)
 {

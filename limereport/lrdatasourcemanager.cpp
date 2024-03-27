@@ -349,7 +349,8 @@ void DataSourceManager::add_timing(float t_EC, float t_EO, float t_IC, float t_I
             <<timming_Silinder;
 }
 
-void DataSourceManager::add_peak(QVector<float> peak, int odd_even,QString peak_judul,QString suhu_judul, QVector<float> suhu, QStringList silinder){
+void DataSourceManager::add_peak(QVector<float> peak, int odd_even,QString peak_judul,QString suhu_judul, QVector<float> suhu, QStringList silinder,
+                                      QVector<float> peak_ign, QVector<float> derajat_ign, QString satuan_ign){
 
     for(int i=0; i<peak.size(); i++){
         qDebug()<<"<LR peak: "<<peak[i];
@@ -360,6 +361,10 @@ void DataSourceManager::add_peak(QVector<float> peak, int odd_even,QString peak_
      suhu_satuans = suhu_judul;
      list_suhu = suhu;
      list_silinder = silinder;
+
+     peak_igns = peak_ign;
+     derajat_igns = derajat_ign;
+     satuan_igns = satuan_ign;
      //masukkan ke data sourcemanager
 }
 

@@ -1,12 +1,8 @@
-#include "fh_gridlineschart_paradevib.h"
+#include "fh_qwt.h"
 
-//#include "qwt.h"
-//#include "qwt_plot_curve.h"
-//#include "kumpulan_struct.h"
-//extern struct t_chart_parade_vib_recip vib_recip;
 
 namespace LimeReport {
-void fh_gridlineschart_vibrecip::paintChart(QPainter *painter, QRectF chartRect, QVector<float> timming, QVector<float> PeakAbs, int odd_evn
+void fh_qwt::paintChart(QPainter *painter, QRectF chartRect, QVector<float> timming, QVector<float> PeakAbs, int odd_evn
                                             ,QString satuan_peak,QString satuan_suhu, QVector<float> suhu_sil,QStringList nama_silinder,
                                             QVector<float> peak_ign, QVector<float> derajat_ign, QString satuan_ign)
 {
@@ -55,7 +51,7 @@ void fh_gridlineschart_vibrecip::paintChart(QPainter *painter, QRectF chartRect,
     counter_paintGrid_paradeVib+=1;
 }
 
-void fh_gridlineschart_vibrecip::paintSerialLines(QPainter* painter, QRectF barsRect)
+void fh_qwt::paintSerialLines(QPainter* painter, QRectF barsRect)
 {
 
     if (valuesCount() == 0) return;
@@ -318,5 +314,5 @@ void fh_gridlineschart_vibrecip::paintSerialLines(QPainter* painter, QRectF bars
 
         painter->restore();
 #endif
-}    
+}
 }

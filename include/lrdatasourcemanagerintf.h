@@ -56,7 +56,8 @@ public:
     virtual QVariant variable(const QString& variableName) = 0;
     virtual bool addModel(const QString& name, QAbstractItemModel *model, bool owned) = 0;
     virtual void add_timing(float t_EC, float t_EO, float t_IC, float t_IO, float t_sil)=0;
-    virtual void add_peak(QVector<float> peak, int odd_even,QString peak_judul,QString suhu_judul, QVector<float> suhu, QStringList silinder)=0;
+    virtual void add_peak(QVector<float> peak, int odd_even,QString peak_judul,QString suhu_judul, QVector<float> suhu, QStringList silinder,
+                          QVector<float> peak_ign, QVector<float> derajat_ign, QString satuan_ign)=0;
     virtual void removeModel(const QString& name) = 0;
     virtual bool containsDatasource(const QString& dataSourceName) = 0;
     virtual void clearUserVariables()=0;

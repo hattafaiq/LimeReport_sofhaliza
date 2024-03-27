@@ -15,8 +15,11 @@ INCLUDEPATH += \
     $$REPORT_PATH/scripteditor
 
 SOURCES += \
+    $$PWD/items/charts/fh_gridlineschart_parade_ign.cpp \
+    $$PWD/items/charts/fh_gridlineschart_parade_ign2.cpp \
     $$PWD/items/charts/fh_gridlineschart_paradevib.cpp \
     $$PWD/items/charts/fh_gridlineschart_paradevib2.cpp \
+    $$PWD/items/charts/fh_qwt.cpp \
     $$PWD/scripteditor/lrcompletermodel.cpp \
     $$REPORT_PATH/bands/lrpageheader.cpp \
     $$REPORT_PATH/bands/lrpagefooter.cpp \
@@ -98,8 +101,11 @@ CONFIG(svg) {
 }
 
 HEADERS += \
+    $$PWD/items/charts/fh_gridlineschart_parade_ign.h \
+    $$PWD/items/charts/fh_gridlineschart_parade_ign2.h \
     $$PWD/items/charts/fh_gridlineschart_paradevib.h \
     $$PWD/items/charts/fh_gridlineschart_paradevib2.h \
+    $$PWD/items/charts/fh_qwt.h \
     $$PWD/items/lreditableimageitemintf.h \
 #    $$REPORT_PATH/kumpulan_struct.h \
     $$PWD/scripteditor/lrcompletermodel.h \

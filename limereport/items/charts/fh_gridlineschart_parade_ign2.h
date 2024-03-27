@@ -1,12 +1,13 @@
-#ifndef FH_GRIDLINESCHART_PARADEVIB_H
-#define FH_GRIDLINESCHART_PARADEVIB_H
+#ifndef FH_GRIDLINESCHART_PARADE_IGN2_H
+#define FH_GRIDLINESCHART_PARADE_IGN2_H
+
 
 #include "lrlineschart.h"
 
 namespace LimeReport {
-class fh_gridlineschart_vibrecip: public LinesChart{
+class fh_gridlineschart_parade_ign2: public LinesChart{
 public:
-    fh_gridlineschart_vibrecip(ChartItem* chartItem):LinesChart(chartItem){}
+    fh_gridlineschart_parade_ign2(ChartItem* chartItem):LinesChart(chartItem){}
     void paintChart(QPainter *painter, QRectF chartRect,QVector<float> timming, QVector<float> PeakAbs, int odd_evn,
                     QString satuan_peak,QString satuan_suhu, QVector<float> suhu_sil,QStringList nama_silinder,
                     QVector<float> peak_ign, QVector<float> derajat_ign, QString satuan_ign);
@@ -17,4 +18,5 @@ private:
 
 };
 }
-#endif // FH_GRIDLINESCHART_PARADEVIB_H
+
+#endif // FH_GRIDLINESCHART_PARADE_IGN2_H
